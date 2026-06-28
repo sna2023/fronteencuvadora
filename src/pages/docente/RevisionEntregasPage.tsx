@@ -12,7 +12,7 @@ export const RevisionEntregasPage: React.FC = () => {
 
   useEffect(() => {
     getMisProyectosAsignados()
-      .then(setProyectos)
+      .then(data => setProyectos(Array.isArray(data) ? data : []))
       .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar proyectos.'))
       .finally(() => setLoadingProyectos(false));
   }, []);
@@ -24,7 +24,7 @@ export const RevisionEntregasPage: React.FC = () => {
     setLoadingDocs(true);
     try {
       const data = await getDocumentosProyecto(proyecto.id_proyecto);
-      setDocumentos(data);
+      setDocumentos(Array.isArray(data) ? data : []);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error al cargar documentos.');
     } finally {

@@ -28,7 +28,7 @@ export const NotificacionesBell: React.FC<Props> = ({ accentColor = '#1A365D' })
   const cargar = async () => {
     try {
       const data = await getNotificaciones();
-      setNotifs(data);
+      setNotifs(Array.isArray(data) ? data : []);
     } catch { /* silencioso */ }
   };
 

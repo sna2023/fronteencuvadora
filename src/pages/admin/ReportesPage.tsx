@@ -73,7 +73,7 @@ export const ReportesPage: React.FC = () => {
     setLoading(true);
     setError('');
     getUsuarios()
-      .then(setUsuarios)
+      .then(data => setUsuarios(Array.isArray(data) ? data : []))
       .catch(() => setError('No se pudieron cargar los datos.'))
       .finally(() => setLoading(false));
   };

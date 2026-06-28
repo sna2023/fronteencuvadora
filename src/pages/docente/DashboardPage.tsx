@@ -23,7 +23,7 @@ export const DocenteDashboardPage: React.FC<DocenteDashboardPageProps> = ({
 
   useEffect(() => {
     getMisProyectosAsignados()
-      .then(setProyectos)
+      .then(data => setProyectos(Array.isArray(data) ? data : []))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);

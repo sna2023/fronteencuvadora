@@ -26,7 +26,7 @@ export const MentoriasPage: React.FC = () => {
 
   useEffect(() => {
     getMisMentorias()
-      .then(setProyectos)
+      .then(data => setProyectos(Array.isArray(data) ? data : []))
       .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar mentorías.'))
       .finally(() => setLoading(false));
   }, []);
@@ -164,7 +164,7 @@ const AsesoriasPanel: React.FC<{ id_seguimiento: number }> = ({ id_seguimiento }
 
   useEffect(() => {
     getAsesorias(id_seguimiento)
-      .then(setAsesorias)
+      .then(data => setAsesorias(Array.isArray(data) ? data : []))
       .catch(() => setError('No se pudieron cargar las asesorías.'))
       .finally(() => setLoading(false));
   }, [id_seguimiento]);
@@ -254,7 +254,7 @@ const RevisionesPanel: React.FC<{ id_seguimiento: number; finalizada: boolean }>
 
   useEffect(() => {
     getRevisiones(id_seguimiento)
-      .then(setRevisiones)
+      .then(data => setRevisiones(Array.isArray(data) ? data : []))
       .catch(() => setError('No se pudieron cargar las entregas.'))
       .finally(() => setLoading(false));
   }, [id_seguimiento]);

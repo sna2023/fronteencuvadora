@@ -132,7 +132,7 @@ const DetalleModal: React.FC<DetalleModalProps> = ({ proyecto, onClose, onEstado
                 <Calendar className="w-3.5 h-3.5" /> Fecha de registro
               </div>
               <p className="text-sm font-normal text-gray-800">
-                {new Date(proyecto.fecha_registro.replace(' ', 'T')).toLocaleDateString('es-EC', { day: '2-digit', month: 'long', year: 'numeric' })}
+                {proyecto.fecha_registro ? new Date(proyecto.fecha_registro.replace(' ', 'T')).toLocaleDateString('es-EC', { day: '2-digit', month: 'long', year: 'numeric' }) : '—'}
               </p>
             </div>
           </div>
@@ -217,7 +217,7 @@ export const AprobarProyectosPage: React.FC = () => {
     setLoading(true);
     setError('');
     getTodosProyectos()
-      .then(setProyectos)
+      .then(data => setProyectos(Array.isArray(data) ? data : []))
       .catch(() => setError('No se pudieron cargar los proyectos.'))
       .finally(() => setLoading(false));
   };
@@ -340,7 +340,7 @@ export const AprobarProyectosPage: React.FC = () => {
                       <p className="text-xs text-gray-400">{p.usuario?.correo ?? ''}</p>
                     </td>
                     <td className="px-5 py-4 text-xs text-gray-400 font-medium hidden lg:table-cell">
-                      {new Date(p.fecha_registro.replace(' ', 'T')).toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      {p.fecha_registro ? new Date(p.fecha_registro.replace(' ', 'T')).toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                     </td>
                     <td className="px-5 py-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${ESTADO_COLOR[p.estado]}`}>

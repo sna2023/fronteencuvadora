@@ -1,10 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Component, type ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { Login } from './components/Login';
 import { AdminDashboard } from './components/AdminDashboard';
 import { MentorDashboard } from './components/MentorDashboard';
 import { Dashboard } from './components/Dashboard';
 import { logout as apiLogout, type User } from './api';
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: string }> {
+  state = { hasError: false, error: '' };
+  static getDerivedStateFromError(err: Error) { return { hasError: true, error: err.message }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-50 gap-4 p-8 text-center">
+          <p className="text-lg font-medium text-red-600">Algo salió mal</p>
+          <p className="text-sm text-gray-500">{this.state.error}</p>
+          <button onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
+            className="px-4 py-2 bg-[#1A365D] text-white rounded-lg text-sm cursor-pointer">
+            Volver al login
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // Componente de redirección estable — evita el bucle de Navigate en React Router v7 + React 19
 function Redirect({ to }: { to: string }) {
@@ -107,9 +127,11 @@ function App() {
   );
 
   return (
-    <BrowserRouter>
-      <AppRoutes user={user} onLogin={handleLogin} onLogout={handleLogout} />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppRoutes user={user} onLogin={handleLogin} onLogout={handleLogout} />
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

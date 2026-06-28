@@ -28,14 +28,15 @@ export const ReunionesPage: React.FC = () => {
   useEffect(() => {
     (async () => {
       try {
-        const proyectos: ProyectoConMentoria[] = await getMisMentorias();
+        const data = await getMisMentorias();
+        const proyectos: ProyectoConMentoria[] = Array.isArray(data) ? data : [];
         const todas: AsesoriaConProyecto[] = [];
 
         await Promise.all(proyectos.map(async p => {
-          const seg = p.seguimientos[0];
+          const seg = p.seguimientos?.[0];
           if (!seg) return;
           const asesorias = await getAsesorias(seg.id_seguimiento);
-          asesorias.forEach(a => todas.push({ ...a, nombre_proyecto: p.nombre_proyecto }));
+          (Array.isArray(asesorias) ? asesorias : []).forEach(a => todas.push({ ...a, nombre_proyecto: p.nombre_proyecto }));
         }));
 
         // Ordenar: programadas primero (por fecha), luego realizadas, luego canceladas

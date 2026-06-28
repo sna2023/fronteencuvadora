@@ -14,11 +14,15 @@ export const AdminDashboardPage: React.FC = () => {
   const [loading,     setLoading]     = useState(true);
 
   useEffect(() => {
-    Promise.all([getUsuarios(), getTodosProyectos(), getAsignaciones()])
+    Promise.all([
+      getUsuarios().catch(() => []),
+      getTodosProyectos().catch(() => []),
+      getAsignaciones().catch(() => []),
+    ])
       .then(([u, p, a]) => {
-        setUsuarios(u);
-        setProyectos(p);
-        setAsignados(new Set(a.map(x => x.id_proyecto)).size);
+        setUsuarios(Array.isArray(u) ? u : []);
+        setProyectos(Array.isArray(p) ? p : []);
+        setAsignados(Array.isArray(a) ? new Set(a.map(x => x.id_proyecto)).size : 0);
       })
       .finally(() => setLoading(false));
   }, []);

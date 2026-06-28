@@ -28,9 +28,11 @@ export const AsesoriasPage: React.FC = () => {
     (async () => {
       try {
         const proyectos = await getMisProyectosAsignados();
-        const rows = await Promise.all(proyectos.map(async p => {
+        const pArray = Array.isArray(proyectos) ? proyectos : [];
+        const rows = await Promise.all(pArray.map(async p => {
           const segs   = await getSeguimientosProyecto(p.id_proyecto);
-          const activo = segs.find(s => !s.fecha_fin) ?? segs[segs.length - 1] ?? null;
+          const segsArray = Array.isArray(segs) ? segs : [];
+          const activo = segsArray.find(s => !s.fecha_fin) ?? segsArray[segsArray.length - 1] ?? null;
           return { ...p, seguimiento: activo };
         }));
         setFilas(rows);

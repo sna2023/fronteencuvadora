@@ -36,7 +36,7 @@ export const ProyectosPage: React.FC = () => {
     setLoading(true);
     setError('');
     getMisProyectos()
-      .then(setProyectos)
+      .then(data => setProyectos(Array.isArray(data) ? data : []))
       .catch(() => setError('No se pudieron cargar los proyectos.'))
       .finally(() => setLoading(false));
   };

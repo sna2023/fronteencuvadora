@@ -19,9 +19,10 @@ export const SeguimientoPage: React.FC = () => {
     (async () => {
       try {
         const ps = await getMisProyectosAsignados();
-        setProyectos(ps);
+        const psArray = Array.isArray(ps) ? ps : [];
+        setProyectos(psArray);
         const resultados = await Promise.all(
-          ps.map(p => getSeguimientosProyecto(p.id_proyecto).then(s => ({ id: p.id_proyecto, s })))
+          psArray.map(p => getSeguimientosProyecto(p.id_proyecto).then(s => ({ id: p.id_proyecto, s: Array.isArray(s) ? s : [] })))
         );
         const mapa: Record<number, Seguimiento[]> = {};
         resultados.forEach(({ id, s }) => { mapa[id] = s; });

@@ -36,13 +36,15 @@ export const SeguimientoDetallePage: React.FC = () => {
   useEffect(() => {
     Promise.all([getMisProyectosAsignados(), getSeguimientosProyecto(id)])
       .then(([proyectos, segs]) => {
-        const p = proyectos.find(x => x.id_proyecto === id) ?? null;
+        const pArray = Array.isArray(proyectos) ? proyectos : [];
+        const sArray = Array.isArray(segs) ? segs : [];
+        const p = pArray.find(x => x.id_proyecto === id) ?? null;
         setProyecto(p);
-        setLista(segs);
-        const activo = segs.find(s => !s.fecha_fin);
+        setLista(sArray);
+        const activo = sArray.find(s => !s.fecha_fin);
         const initialTab = activo ? ETAPAS.indexOf(activo.etapa?.nombre_etapa ?? '') : 0;
         if (activo) setTab(initialTab);
-        const initialSeg = segs.find(s => s.etapa?.nombre_etapa === ETAPAS[initialTab]);
+        const initialSeg = sArray.find(s => s.etapa?.nombre_etapa === ETAPAS[initialTab]);
         if (initialSeg) cargarRevisiones(initialSeg.id_seguimiento);
       })
       .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar datos.'))
@@ -55,9 +57,10 @@ export const SeguimientoDetallePage: React.FC = () => {
     setLoadingRevs(prev => ({ ...prev, [id_seguimiento]: true }));
     getRevisiones(id_seguimiento)
       .then(revs => {
-        setRevisiones(prev => ({ ...prev, [id_seguimiento]: revs }));
+        const revsArray = Array.isArray(revs) ? revs : [];
+        setRevisiones(prev => ({ ...prev, [id_seguimiento]: revsArray }));
         const obsRev: Record<number, string> = {};
-        revs.forEach(r => { obsRev[r.id_revision] = r.observaciones ?? ''; });
+        revsArray.forEach(r => { obsRev[r.id_revision] = r.observaciones ?? ''; });
         setObsRevision(prev => ({ ...prev, ...obsRev }));
       })
       .catch(() => {})

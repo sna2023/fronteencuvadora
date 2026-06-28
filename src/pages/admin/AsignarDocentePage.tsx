@@ -136,9 +136,9 @@ export const AsignarDocentePage: React.FC = () => {
     try { asignacionesCargadas = await getAsignaciones(); }
     catch (e) { setError(e instanceof Error ? e.message : 'Error al cargar asignaciones.'); }
 
-    setProyectos(proyectosCargados);
-    setMentores(mentoresCargados);
-    setAsignaciones(asignacionesCargadas);
+    setProyectos(Array.isArray(proyectosCargados) ? proyectosCargados : []);
+    setMentores(Array.isArray(mentoresCargados) ? mentoresCargados : []);
+    setAsignaciones(Array.isArray(asignacionesCargadas) ? asignacionesCargadas : []);
     setLoading(false);
   };
 
