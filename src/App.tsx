@@ -15,9 +15,9 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
         <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-50 gap-4 p-8 text-center">
           <p className="text-lg font-medium text-red-600">Algo salio mal</p>
           <p className="text-sm text-gray-500">{this.state.error}</p>
-          <button onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
+          <button onClick={() => { localStorage.clear(); window.location.reload(); }}
             className="px-4 py-2 bg-[#1A365D] text-white rounded-lg text-sm cursor-pointer">
-            Volver al login
+            Recargar
           </button>
         </div>
       );
@@ -48,7 +48,7 @@ function App() {
   };
 
   const handleLogout = async () => {
-    try { await apiLogout(); } catch { /* ignorar */ } finally {
+    try { await apiLogout(); } catch {} finally {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       setUser(null);
@@ -61,24 +61,18 @@ function App() {
     </div>
   );
 
-  if (!user) {
-    return (
-      <ErrorBoundary>
-        <Login onLogin={handleLogin} />
-      </ErrorBoundary>
-    );
-  }
-
-  const dashboard = user.rol === 'administrador'
-    ? <AdminDashboard user={user} onLogout={handleLogout} />
-    : user.rol === 'mentor'
-    ? <MentorDashboard user={user} onLogout={handleLogout} />
-    : <Dashboard user={user} onLogout={handleLogout} />;
-
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        {dashboard}
+        {user ? (
+          user.rol === 'administrador'
+            ? <AdminDashboard user={user} onLogout={handleLogout} />
+            : user.rol === 'mentor'
+            ? <MentorDashboard user={user} onLogout={handleLogout} />
+            : <Dashboard user={user} onLogout={handleLogout} />
+        ) : (
+          <Login onLogin={handleLogin} />
+        )}
       </BrowserRouter>
     </ErrorBoundary>
   );
