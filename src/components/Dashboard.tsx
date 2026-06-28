@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { GraduationCap, LayoutDashboard, FolderKanban, LogOut, BookOpen, Lightbulb, FlaskConical, Rocket, TrendingUp, Building2, Target, Users, BarChart3, RefreshCw, Handshake, CalendarDays, UserCircle } from 'lucide-react';
 import { NotificacionesBell } from './NotificacionesBell';
 import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';

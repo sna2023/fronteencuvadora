@@ -1,5 +1,5 @@
 import { useState, useEffect, Component, type ReactNode } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { Login } from './components/Login';
 import { AdminDashboard } from './components/AdminDashboard';
 import { MentorDashboard } from './components/MentorDashboard';

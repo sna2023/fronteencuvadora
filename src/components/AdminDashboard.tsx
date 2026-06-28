@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { LogOut, LayoutDashboard, UserCog, ClipboardCheck, UserCheck, BarChart3 } from 'lucide-react';
 import { NotificacionesBell } from './NotificacionesBell';
-import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
+import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import type { User } from '../api';
 import { AdminDashboardPage } from '../pages/admin/DashboardPage';
 import { GestionUsuariosPage } from '../pages/admin/GestionUsuariosPage';
