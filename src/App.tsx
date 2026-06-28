@@ -1,5 +1,5 @@
 import { useState, useEffect, Component, type ReactNode } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from './components/Login';
 import { AdminDashboard } from './components/AdminDashboard';
 import { MentorDashboard } from './components/MentorDashboard';
@@ -26,13 +26,6 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
   }
 }
 
-// Componente de redirección estable — evita el bucle de Navigate en React Router v7 + React 19
-function Redirect({ to }: { to: string }) {
-  const navigate = useNavigate();
-  useEffect(() => { navigate(to, { replace: true }); }, [navigate, to]);
-  return null;
-}
-
 function AppRoutes({ user, onLogin, onLogout }: {
   user: User | null;
   onLogin: (u: User, t: string) => void;
@@ -46,47 +39,41 @@ function AppRoutes({ user, onLogin, onLogout }: {
 
   return (
     <Routes>
-      {/* Raíz */}
-      <Route path="/" element={<Redirect to={destino} />} />
+      <Route path="/" element={<Navigate to={destino} replace />} />
 
-      {/* Login */}
       <Route
         path="/login"
-        element={user ? <Redirect to={destino} /> : <Login onLogin={onLogin} />}
+        element={user ? <Navigate to={destino} replace /> : <Login onLogin={onLogin} />}
       />
 
-      {/* Admin */}
       <Route
         path="/admin/*"
         element={
           user?.rol === 'administrador'
             ? <AdminDashboard user={user} onLogout={onLogout} />
-            : <Redirect to="/login" />
+            : <Navigate to="/login" replace />
         }
       />
 
-      {/* Mentor */}
       <Route
         path="/mentor/*"
         element={
           user?.rol === 'mentor'
             ? <MentorDashboard user={user} onLogout={onLogout} />
-            : <Redirect to="/login" />
+            : <Navigate to="/login" replace />
         }
       />
 
-      {/* Emprendedor */}
       <Route
         path="/emprendedor/*"
         element={
           user?.rol === 'emprendedor'
             ? <Dashboard user={user} onLogout={onLogout} />
-            : <Redirect to="/login" />
+            : <Navigate to="/login" replace />
         }
       />
 
-      {/* Catch-all */}
-      <Route path="*" element={<Redirect to={destino} />} />
+      <Route path="*" element={<Navigate to={destino} replace />} />
     </Routes>
   );
 }
