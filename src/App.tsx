@@ -1,5 +1,5 @@
 import { useState, useEffect, Component, type ReactNode } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Login } from './components/Login';
 import { AdminDashboard } from './components/AdminDashboard';
 import { MentorDashboard } from './components/MentorDashboard';
@@ -26,54 +26,68 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
   }
 }
 
+function AuthRedirect({ user }: { user: User | null }) {
+  useEffect(() => {
+    if (!user) { window.location.replace('/login'); return; }
+    const map: Record<string, string> = {
+      administrador: '/admin/dashboard',
+      mentor: '/mentor/dashboard',
+      emprendedor: '/emprendedor/dashboard',
+    };
+    const dest = map[user.rol];
+    if (dest && window.location.pathname !== dest) {
+      window.location.replace(dest);
+    }
+  }, [user]);
+  return null;
+}
+
 function AppRoutes({ user, onLogin, onLogout }: {
   user: User | null;
   onLogin: (u: User, t: string) => void;
   onLogout: () => void;
 }) {
-  const destino = !user
-    ? '/login'
-    : user.rol === 'administrador' ? '/admin/dashboard'
-    : user.rol === 'mentor'        ? '/mentor/dashboard'
-    : '/emprendedor/dashboard';
+  if (!user) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login onLogin={onLogin} />} />
+        <Route path="*" element={<Login onLogin={onLogin} />} />
+      </Routes>
+    );
+  }
 
   return (
     <Routes>
-      <Route path="/" element={<Navigate to={destino} replace />} />
-
-      <Route
-        path="/login"
-        element={user ? <Navigate to={destino} replace /> : <Login onLogin={onLogin} />}
-      />
+      <Route path="/login" element={<AuthRedirect user={user} />} />
 
       <Route
         path="/admin/*"
         element={
-          user?.rol === 'administrador'
+          user.rol === 'administrador'
             ? <AdminDashboard user={user} onLogout={onLogout} />
-            : <Navigate to="/login" replace />
+            : <AuthRedirect user={user} />
         }
       />
 
       <Route
         path="/mentor/*"
         element={
-          user?.rol === 'mentor'
+          user.rol === 'mentor'
             ? <MentorDashboard user={user} onLogout={onLogout} />
-            : <Navigate to="/login" replace />
+            : <AuthRedirect user={user} />
         }
       />
 
       <Route
         path="/emprendedor/*"
         element={
-          user?.rol === 'emprendedor'
+          user.rol === 'emprendedor'
             ? <Dashboard user={user} onLogout={onLogout} />
-            : <Navigate to="/login" replace />
+            : <AuthRedirect user={user} />
         }
       />
 
-      <Route path="*" element={<Navigate to={destino} replace />} />
+      <Route path="*" element={<AuthRedirect user={user} />} />
     </Routes>
   );
 }
