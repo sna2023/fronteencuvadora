@@ -2,12 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { GraduationCap, LayoutDashboard, FolderKanban, LogOut, BookOpen, Lightbulb, FlaskConical, Rocket, TrendingUp, Building2, Target, Users, BarChart3, RefreshCw, Handshake, CalendarDays, UserCircle } from 'lucide-react';
 import { NotificacionesBell } from './NotificacionesBell';
 import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
-
-function Redirect({ to }: { to: string }) {
-  const nav = useNavigate();
-  useEffect(() => { nav(to, { replace: true }); }, [nav, to]);
-  return null;
-}
 import type { User } from '../api';
 import { getMisProyectos } from '../api';
 import { ProyectosPage } from '../pages/estudiante/ProyectosPage';
@@ -200,14 +194,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         <main className="flex-1 overflow-y-auto p-6 lg:p-10">
           <div className="max-w-6xl mx-auto w-full">
             <Routes>
-              <Route index element={<Redirect to="dashboard" />} />
+              <Route index element={<EstudianteHome user={user} />} />
               <Route path="dashboard" element={<EstudianteHome user={user} />} />
               <Route path="proyectos" element={<ProyectosPage />} />
               <Route path="mentorias" element={<MentoriasPage />} />
               <Route path="reuniones" element={<ReunionesPage />} />
               <Route path="guia"      element={<GuiaPage />} />
               <Route path="perfil"    element={<PerfilEmprendedorPage />} />
-              <Route path="*"         element={<Redirect to="dashboard" />} />
+              <Route path="*"         element={<EstudianteHome user={user} />} />
             </Routes>
           </div>
         </main>

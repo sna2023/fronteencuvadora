@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LogOut, LayoutDashboard, UserCog, ClipboardCheck, UserCheck, BarChart3 } from 'lucide-react';
 import { NotificacionesBell } from './NotificacionesBell';
-import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
-
-function Redirect({ to }: { to: string }) {
-  const nav = useNavigate();
-  useEffect(() => { nav(to, { replace: true }); }, [nav, to]);
-  return null;
-}
+import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import type { User } from '../api';
 import { AdminDashboardPage } from '../pages/admin/DashboardPage';
 import { GestionUsuariosPage } from '../pages/admin/GestionUsuariosPage';
@@ -99,13 +93,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
         <main className="flex-1 overflow-y-auto p-6 lg:p-10">
           <div className="max-w-6xl mx-auto w-full">
             <Routes>
-              <Route index element={<Redirect to="dashboard" />} />
+              <Route index element={<AdminDashboardPage />} />
               <Route path="dashboard" element={<AdminDashboardPage />} />
               <Route path="proyectos"       element={<AprobarProyectosPage />} />
               <Route path="asignar-mentor" element={<AsignarDocentePage />} />
               <Route path="usuarios"        element={<GestionUsuariosPage />} />
               <Route path="reportes"        element={<ReportesPage />} />
-              <Route path="*"         element={<Redirect to="dashboard" />} />
+              <Route path="*"         element={<AdminDashboardPage />} />
             </Routes>
           </div>
         </main>

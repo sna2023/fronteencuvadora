@@ -5,12 +5,6 @@ import {
 } from 'lucide-react';
 import { NotificacionesBell } from './NotificacionesBell';
 import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
-
-function Redirect({ to }: { to: string }) {
-  const nav = useNavigate();
-  useEffect(() => { nav(to, { replace: true }); }, [nav, to]);
-  return null;
-}
 import { getDashboard, evaluateProject, getEntregas, storageUrl, type User, type Project, type Entrega } from '../api';
 import { DocenteDashboardPage } from '../pages/docente/DashboardPage';
 import { EvaluacionesPage } from '../pages/docente/EvaluacionesPage';
@@ -295,7 +289,12 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({ user, onLogout
           <div className="max-w-6xl mx-auto w-full">
 
             <Routes>
-              <Route index element={<Redirect to="dashboard" />} />
+              <Route index element={
+                <DocenteDashboardPage
+                  onNavigateToEvaluaciones={() => navigate('/mentor/evaluaciones')}
+                  onNavigateToAsesorias={() => navigate('/mentor/asesorias')}
+                />
+              } />
               <Route path="dashboard" element={
                 <DocenteDashboardPage
                   onNavigateToEvaluaciones={() => navigate('/mentor/evaluaciones')}
@@ -307,7 +306,12 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({ user, onLogout
               <Route path="seguimiento/:id_proyecto"      element={<SeguimientoDetallePage />} />
               <Route path="asesorias" element={<AsesoriasPage />} />
               <Route path="perfil" element={<PerfilPage />} />
-              <Route path="*" element={<Redirect to="dashboard" />} />
+              <Route path="*" element={
+                <DocenteDashboardPage
+                  onNavigateToEvaluaciones={() => navigate('/mentor/evaluaciones')}
+                  onNavigateToAsesorias={() => navigate('/mentor/asesorias')}
+                />
+              } />
             </Routes>
 
           </div>

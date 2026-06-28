@@ -13,7 +13,7 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
     if (this.state.hasError) {
       return (
         <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-50 gap-4 p-8 text-center">
-          <p className="text-lg font-medium text-red-600">Algo salió mal</p>
+          <p className="text-lg font-medium text-red-600">Algo salio mal</p>
           <p className="text-sm text-gray-500">{this.state.error}</p>
           <button onClick={() => { localStorage.clear(); window.location.href = '/login'; }}
             className="px-4 py-2 bg-[#1A365D] text-white rounded-lg text-sm cursor-pointer">
@@ -24,72 +24,6 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
     }
     return this.props.children;
   }
-}
-
-function AuthRedirect({ user }: { user: User | null }) {
-  useEffect(() => {
-    if (!user) { window.location.replace('/login'); return; }
-    const map: Record<string, string> = {
-      administrador: '/admin/dashboard',
-      mentor: '/mentor/dashboard',
-      emprendedor: '/emprendedor/dashboard',
-    };
-    const dest = map[user.rol];
-    if (dest && window.location.pathname !== dest) {
-      window.location.replace(dest);
-    }
-  }, [user]);
-  return null;
-}
-
-function AppRoutes({ user, onLogin, onLogout }: {
-  user: User | null;
-  onLogin: (u: User, t: string) => void;
-  onLogout: () => void;
-}) {
-  if (!user) {
-    return (
-      <Routes>
-        <Route path="/login" element={<Login onLogin={onLogin} />} />
-        <Route path="*" element={<Login onLogin={onLogin} />} />
-      </Routes>
-    );
-  }
-
-  return (
-    <Routes>
-      <Route path="/login" element={<AuthRedirect user={user} />} />
-
-      <Route
-        path="/admin/*"
-        element={
-          user.rol === 'administrador'
-            ? <AdminDashboard user={user} onLogout={onLogout} />
-            : <AuthRedirect user={user} />
-        }
-      />
-
-      <Route
-        path="/mentor/*"
-        element={
-          user.rol === 'mentor'
-            ? <MentorDashboard user={user} onLogout={onLogout} />
-            : <AuthRedirect user={user} />
-        }
-      />
-
-      <Route
-        path="/emprendedor/*"
-        element={
-          user.rol === 'emprendedor'
-            ? <Dashboard user={user} onLogout={onLogout} />
-            : <AuthRedirect user={user} />
-        }
-      />
-
-      <Route path="*" element={<AuthRedirect user={user} />} />
-    </Routes>
-  );
 }
 
 function App() {
@@ -127,10 +61,24 @@ function App() {
     </div>
   );
 
+  if (!user) {
+    return (
+      <ErrorBoundary>
+        <Login onLogin={handleLogin} />
+      </ErrorBoundary>
+    );
+  }
+
+  const dashboard = user.rol === 'administrador'
+    ? <AdminDashboard user={user} onLogout={handleLogout} />
+    : user.rol === 'mentor'
+    ? <MentorDashboard user={user} onLogout={handleLogout} />
+    : <Dashboard user={user} onLogout={handleLogout} />;
+
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <AppRoutes user={user} onLogin={handleLogin} onLogout={handleLogout} />
+        {dashboard}
       </BrowserRouter>
     </ErrorBoundary>
   );
