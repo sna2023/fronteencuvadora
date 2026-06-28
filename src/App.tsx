@@ -61,22 +61,36 @@ function App() {
     </div>
   );
 
+  const base = user
+    ? user.rol === 'administrador' ? '/admin'
+    : user.rol === 'mentor' ? '/mentor'
+    : '/emprendedor'
+    : '/login';
+
   return (
     <ErrorBoundary>
       <BrowserRouter>
         {user ? (
-          <Routes>
-            <Route path="/admin/*" element={<AdminDashboard user={user} onLogout={handleLogout} />} />
-            <Route path="/mentor/*" element={<MentorDashboard user={user} onLogout={handleLogout} />} />
-            <Route path="/emprendedor/*" element={<Dashboard user={user} onLogout={handleLogout} />} />
+          <Routes key={user.rol}>
+            <Route path={`${base}/*`} element={
+              user.rol === 'administrador'
+                ? <AdminDashboard user={user} onLogout={handleLogout} />
+                : user.rol === 'mentor'
+                ? <MentorDashboard user={user} onLogout={handleLogout} />
+                : <Dashboard user={user} onLogout={handleLogout} />
+            } />
             <Route path="*" element={
-              user.rol === 'administrador' ? <AdminDashboard user={user} onLogout={handleLogout} />
-              : user.rol === 'mentor' ? <MentorDashboard user={user} onLogout={handleLogout} />
-              : <Dashboard user={user} onLogout={handleLogout} />
+              user.rol === 'administrador'
+                ? <AdminDashboard user={user} onLogout={handleLogout} />
+                : user.rol === 'mentor'
+                ? <MentorDashboard user={user} onLogout={handleLogout} />
+                : <Dashboard user={user} onLogout={handleLogout} />
             } />
           </Routes>
         ) : (
-          <Login onLogin={handleLogin} />
+          <Routes>
+            <Route path="*" element={<Login onLogin={handleLogin} />} />
+          </Routes>
         )}
       </BrowserRouter>
     </ErrorBoundary>
