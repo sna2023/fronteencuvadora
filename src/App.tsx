@@ -1,5 +1,5 @@
 import { useState, useEffect, Component, type ReactNode } from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Login } from './components/Login';
 import { AdminDashboard } from './components/AdminDashboard';
 import { MentorDashboard } from './components/MentorDashboard';
@@ -65,11 +65,16 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         {user ? (
-          user.rol === 'administrador'
-            ? <AdminDashboard user={user} onLogout={handleLogout} />
-            : user.rol === 'mentor'
-            ? <MentorDashboard user={user} onLogout={handleLogout} />
-            : <Dashboard user={user} onLogout={handleLogout} />
+          <Routes>
+            <Route path="/admin/*" element={<AdminDashboard user={user} onLogout={handleLogout} />} />
+            <Route path="/mentor/*" element={<MentorDashboard user={user} onLogout={handleLogout} />} />
+            <Route path="/emprendedor/*" element={<Dashboard user={user} onLogout={handleLogout} />} />
+            <Route path="*" element={
+              user.rol === 'administrador' ? <AdminDashboard user={user} onLogout={handleLogout} />
+              : user.rol === 'mentor' ? <MentorDashboard user={user} onLogout={handleLogout} />
+              : <Dashboard user={user} onLogout={handleLogout} />
+            } />
+          </Routes>
         ) : (
           <Login onLogin={handleLogin} />
         )}
