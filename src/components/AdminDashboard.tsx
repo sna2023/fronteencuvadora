@@ -31,7 +31,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
       case 'asignar-mentor': return <AsignarDocentePage />;
       case 'usuarios':       return <GestionUsuariosPage />;
       case 'reportes':       return <ReportesPage />;
-      default:               return <AdminDashboardPage />;
+      default:               return <AdminDashboardPage onNavigate={setPage} />;
     }
   };
 
@@ -70,7 +70,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ user, onLogout }
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-end gap-2 px-8 z-10 shrink-0">
-          <NotificacionesBell accentColor="#1A365D" />
+          <NotificacionesBell accentColor="#1A365D" onNavigate={(url) => {
+            if (url.includes('/usuarios')) setPage('usuarios');
+            else if (url.includes('/proyectos')) setPage('proyectos');
+            else if (url.includes('/asignar-mentor')) setPage('asignar-mentor');
+            else if (url.includes('/reportes')) setPage('reportes');
+          }} />
           <div className="relative" onMouseEnter={() => setIsProfileOpen(true)} onMouseLeave={() => setIsProfileOpen(false)}>
             <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer p-2 rounded-lg hover:bg-gray-50">
               <div className="text-right hidden sm:block">

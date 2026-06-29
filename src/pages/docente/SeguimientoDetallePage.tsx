@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, AlertCircle, X, ChevronRight, FileText,
   Download, Save, MessageSquare, Upload, User, Calendar,
@@ -13,11 +12,12 @@ import {
 
 const ETAPAS = ['Ideación', 'Validación', 'Prototipo', 'Incubación', 'Escalamiento'];
 
-export const SeguimientoDetallePage: React.FC = () => {
-  const { id_proyecto } = useParams<{ id_proyecto: string }>();
-  const navigate        = useNavigate();
-  const id              = Number(id_proyecto);
+interface Props {
+  id: number;
+  onBack?: () => void;
+}
 
+export const SeguimientoDetallePage: React.FC<Props> = ({ id, onBack }) => {
   const [proyecto, setProyecto]   = useState<ProyectoConUsuario | null>(null);
   const [lista, setLista]         = useState<Seguimiento[]>([]);
   const [loading, setLoading]     = useState(true);
@@ -203,7 +203,7 @@ export const SeguimientoDetallePage: React.FC = () => {
       {/* Barra superior */}
       <div className="flex items-center gap-3">
         <button
-          onClick={() => navigate('/mentor/seguimiento')}
+          onClick={onBack}
           className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-[#0f766e] transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" /> Volver

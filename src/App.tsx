@@ -1,5 +1,4 @@
 import { useState, useEffect, Component, type ReactNode } from 'react';
-import { BrowserRouter } from 'react-router-dom';
 import { Login } from './components/Login';
 import { AdminDashboard } from './components/AdminDashboard';
 import { MentorDashboard } from './components/MentorDashboard';
@@ -71,14 +70,12 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <BrowserRouter key={user.rol + user.correo}>
-        {user.rol === 'administrador'
-          ? <AdminDashboard user={user} onLogout={handleLogout} />
-          : user.rol === 'mentor'
-          ? <MentorDashboard user={user} onLogout={handleLogout} />
-          : <Dashboard user={user} onLogout={handleLogout} />
-        }
-      </BrowserRouter>
+      {user.rol === 'administrador'
+        ? <AdminDashboard user={user} onLogout={handleLogout} />
+        : user.rol === 'mentor'
+        ? <MentorDashboard user={user} onLogout={handleLogout} />
+        : <Dashboard user={user} onLogout={handleLogout} />
+      }
     </ErrorBoundary>
   );
 }

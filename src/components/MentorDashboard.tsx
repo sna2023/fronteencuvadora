@@ -205,8 +205,8 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({ user, onLogout
   const renderPage = () => {
     switch (page) {
       case 'evaluaciones':        return <EvaluacionesPage />;
-      case 'seguimiento':         return <SeguimientoPage />;
-      case 'seguimiento-detalle': return <SeguimientoDetallePage id={seguimientoId ?? 0} />;
+      case 'seguimiento':         return <SeguimientoPage onAbrirProyecto={goToSeguimiento} />;
+      case 'seguimiento-detalle': return <SeguimientoDetallePage id={seguimientoId ?? 0} onBack={() => setPage('seguimiento')} />;
       case 'asesorias':           return <AsesoriasPage />;
       case 'perfil':              return <PerfilPage />;
       default:                    return <DocenteDashboardPage onNavigateToEvaluaciones={() => setPage('evaluaciones')} onNavigateToAsesorias={() => setPage('asesorias')} />;
@@ -246,7 +246,20 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({ user, onLogout
 
       <div className="flex-1 flex flex-col relative overflow-hidden">
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-end gap-2 px-8 z-10 shrink-0">
-          <NotificacionesBell accentColor="#0f766e" />
+          <NotificacionesBell accentColor="#0f766e" onNavigate={(url) => {
+            if (url.includes('/seguimiento/')) {
+              const id = Number(url.split('/').pop());
+              if (id) goToSeguimiento(id);
+            } else if (url.includes('/seguimiento')) {
+              setPage('seguimiento');
+            } else if (url.includes('/asesorias')) {
+              setPage('asesorias');
+            } else if (url.includes('/evaluaciones')) {
+              setPage('evaluaciones');
+            } else if (url.includes('/perfil')) {
+              setPage('perfil');
+            }
+          }} />
           <div className="relative" onMouseEnter={() => setIsProfileOpen(true)} onMouseLeave={() => setIsProfileOpen(false)}>
             <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer p-2 rounded-lg hover:bg-gray-50">
               <div className="text-right hidden sm:block">

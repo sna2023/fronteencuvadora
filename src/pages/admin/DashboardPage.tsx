@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Users, FolderKanban, UserCheck, ClipboardCheck,
   TrendingUp, Clock, CheckCircle2, XCircle, ChevronRight,
 } from 'lucide-react';
 import { getUsuarios, getTodosProyectos, getAsignaciones, type UsuarioAdmin, type ProyectoConUsuario } from '../../api';
 
-export const AdminDashboardPage: React.FC = () => {
-  const navigate = useNavigate();
+interface Props {
+  onNavigate?: (page: string) => void;
+}
+
+export const AdminDashboardPage: React.FC<Props> = ({ onNavigate }) => {
   const [usuarios,    setUsuarios]    = useState<UsuarioAdmin[]>([]);
   const [proyectos,   setProyectos]   = useState<ProyectoConUsuario[]>([]);
   const [asignados,   setAsignados]   = useState(0);
@@ -134,13 +136,13 @@ export const AdminDashboardPage: React.FC = () => {
         <p className="text-sm font-semibold text-gray-700 mb-3">Acceso rápido</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
-            { label: 'Gestionar usuarios',  desc: 'Crear, editar y administrar cuentas.',      path: '/admin/usuarios',       icon: Users         },
-            { label: 'Aprobar proyectos',   desc: `${pendientes} proyecto${pendientes !== 1 ? 's' : ''} pendiente${pendientes !== 1 ? 's' : ''} de revisión.`, path: '/admin/proyectos', icon: ClipboardCheck },
-            { label: 'Asignar mentores',    desc: 'Vincula proyectos con mentores activos.',    path: '/admin/asignar-mentor', icon: UserCheck     },
-          ].map(({ label, desc, path, icon: Icon }) => (
+            { label: 'Gestionar usuarios',  desc: 'Crear, editar y administrar cuentas.',      page: 'usuarios',       icon: Users         },
+            { label: 'Aprobar proyectos',   desc: `${pendientes} proyecto${pendientes !== 1 ? 's' : ''} pendiente${pendientes !== 1 ? 's' : ''} de revisión.`, page: 'proyectos', icon: ClipboardCheck },
+            { label: 'Asignar mentores',    desc: 'Vincula proyectos con mentores activos.',    page: 'asignar-mentor', icon: UserCheck     },
+          ].map(({ label, desc, page: targetPage, icon: Icon }) => (
             <button
-              key={path}
-              onClick={() => navigate(path)}
+              key={targetPage}
+              onClick={() => onNavigate?.(targetPage)}
               className="bg-white border border-gray-100 rounded-xl p-5 text-left hover:shadow-sm hover:border-blue-100 transition-all cursor-pointer group"
             >
               <div className="flex items-start justify-between">

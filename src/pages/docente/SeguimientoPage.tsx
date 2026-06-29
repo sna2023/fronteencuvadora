@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Activity, AlertCircle, X, ChevronRight, CheckCircle2, Clock, User } from 'lucide-react';
 import {
   getMisProyectosAsignados, getSeguimientosProyecto,
@@ -8,8 +7,11 @@ import {
 
 const ETAPAS = ['Ideación', 'Validación', 'Prototipo', 'Incubación', 'Escalamiento'];
 
-export const SeguimientoPage: React.FC = () => {
-  const navigate                          = useNavigate();
+interface Props {
+  onAbrirProyecto?: (id: number) => void;
+}
+
+export const SeguimientoPage: React.FC<Props> = ({ onAbrirProyecto }) => {
   const [proyectos, setProyectos]         = useState<ProyectoConUsuario[]>([]);
   const [seguimientos, setSeguimientos]   = useState<Record<number, Seguimiento[]>>({});
   const [loading, setLoading]             = useState(true);
@@ -92,7 +94,7 @@ export const SeguimientoPage: React.FC = () => {
             <section>
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">En curso</p>
               <div className="space-y-3">
-                {activos.map(p => <TarjetaProyecto key={p.id_proyecto} p={p} lista={seguimientos[p.id_proyecto] ?? []} onAbrir={() => navigate(`/mentor/seguimiento/${p.id_proyecto}`)} />)}
+                {activos.map(p => <TarjetaProyecto key={p.id_proyecto} p={p} lista={seguimientos[p.id_proyecto] ?? []} onAbrir={() => onAbrirProyecto?.(p.id_proyecto)} />)}
               </div>
             </section>
           )}

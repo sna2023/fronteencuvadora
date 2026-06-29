@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Bell, CheckCheck, X, Trash2 } from 'lucide-react';
 import {
   getNotificaciones, marcarNotificacionLeida, marcarTodasLeidas,
@@ -14,15 +13,15 @@ const TIPO_COLOR: Record<string, string> = {
 };
 
 interface Props {
-  accentColor?: string; // color del badge y botones, ej: '#1A365D'
+  accentColor?: string;
+  onNavigate?: (url: string) => void;
 }
 
-export const NotificacionesBell: React.FC<Props> = ({ accentColor = '#1A365D' }) => {
+export const NotificacionesBell: React.FC<Props> = ({ accentColor = '#1A365D', onNavigate }) => {
   const [notifs, setNotifs]     = useState<Notificacion[]>([]);
   const [open, setOpen]         = useState(false);
   const ref                     = useRef<HTMLDivElement>(null);
 
-  const navigate  = useNavigate();
   const noLeidas  = notifs.filter(n => !n.leida).length;
 
   const cargar = async () => {
@@ -38,7 +37,6 @@ export const NotificacionesBell: React.FC<Props> = ({ accentColor = '#1A365D' })
     return () => clearInterval(id);
   }, []);
 
-  // Cierra al hacer click fuera
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
@@ -54,7 +52,7 @@ export const NotificacionesBell: React.FC<Props> = ({ accentColor = '#1A365D' })
     }
     if (n.url) {
       setOpen(false);
-      navigate(n.url);
+      onNavigate?.(n.url);
     }
   };
 
@@ -90,7 +88,6 @@ export const NotificacionesBell: React.FC<Props> = ({ accentColor = '#1A365D' })
 
       {open && (
         <div className="absolute right-0 top-12 w-80 bg-white rounded-xl shadow-lg border border-gray-100 z-50 overflow-hidden">
-          {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <span className="text-sm font-medium text-gray-700">Notificaciones</span>
             <div className="flex items-center gap-1">
@@ -121,7 +118,6 @@ export const NotificacionesBell: React.FC<Props> = ({ accentColor = '#1A365D' })
             </div>
           </div>
 
-          {/* Lista */}
           <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
             {notifs.length === 0 ? (
               <div className="px-4 py-8 text-center">
