@@ -1,5 +1,5 @@
 import { useState, useEffect, Component, type ReactNode } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { Login } from './components/Login';
 import { AdminDashboard } from './components/AdminDashboard';
 import { MentorDashboard } from './components/MentorDashboard';
@@ -61,37 +61,23 @@ function App() {
     </div>
   );
 
-  const base = user
-    ? user.rol === 'administrador' ? '/admin'
-    : user.rol === 'mentor' ? '/mentor'
-    : '/emprendedor'
-    : '/login';
+  if (!user) {
+    return (
+      <ErrorBoundary>
+        <Login onLogin={handleLogin} />
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary>
-      <BrowserRouter>
-        {user ? (
-          <Routes key={user.rol}>
-            <Route path={`${base}/*`} element={
-              user.rol === 'administrador'
-                ? <AdminDashboard user={user} onLogout={handleLogout} />
-                : user.rol === 'mentor'
-                ? <MentorDashboard user={user} onLogout={handleLogout} />
-                : <Dashboard user={user} onLogout={handleLogout} />
-            } />
-            <Route path="*" element={
-              user.rol === 'administrador'
-                ? <AdminDashboard user={user} onLogout={handleLogout} />
-                : user.rol === 'mentor'
-                ? <MentorDashboard user={user} onLogout={handleLogout} />
-                : <Dashboard user={user} onLogout={handleLogout} />
-            } />
-          </Routes>
-        ) : (
-          <Routes>
-            <Route path="*" element={<Login onLogin={handleLogin} />} />
-          </Routes>
-        )}
+      <BrowserRouter key={user.rol + user.correo}>
+        {user.rol === 'administrador'
+          ? <AdminDashboard user={user} onLogout={handleLogout} />
+          : user.rol === 'mentor'
+          ? <MentorDashboard user={user} onLogout={handleLogout} />
+          : <Dashboard user={user} onLogout={handleLogout} />
+        }
       </BrowserRouter>
     </ErrorBoundary>
   );
