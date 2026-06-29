@@ -4,7 +4,6 @@ import {
   X, AlertCircle, Send, TrendingUp, FileText, Paperclip, Download, CheckCircle, UserCircle, Activity,
 } from 'lucide-react';
 import { NotificacionesBell } from './NotificacionesBell';
-import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import { getDashboard, evaluateProject, getEntregas, storageUrl, type User, type Project, type Entrega } from '../api';
 import { DocenteDashboardPage } from '../pages/docente/DashboardPage';
 import { EvaluacionesPage } from '../pages/docente/EvaluacionesPage';
@@ -18,8 +17,6 @@ interface MentorDashboardProps {
   onLogout: () => void;
 }
 
-
-// ── Panel de Evaluación ──────────────────────────────────────────────────────
 interface EvalPanelProps {
   project: Project;
   onClose: () => void;
@@ -35,7 +32,7 @@ const EvalPanel: React.FC<EvalPanelProps> = ({ project, onClose, onSubmitted }) 
   const [entregas, setEntregas] = useState<Entrega[]>([]);
 
   useEffect(() => {
-    getEntregas(project.id).then(setEntregas).catch(() => setEntregas([]));
+    getEntregas(project.id).then(data => setEntregas(Array.isArray(data) ? data : [])).catch(() => setEntregas([]));
   }, [project.id]);
 
   const esUltimaEtapa = project.etapa === 'Escalamiento';
@@ -128,12 +125,8 @@ const EvalPanel: React.FC<EvalPanelProps> = ({ project, onClose, onSubmitted }) 
                         <p className="text-sm text-gray-700 font-medium whitespace-pre-line">{e.descripcion}</p>
                       </div>
                       {e.archivo_url && (
-                        <a
-                          href={storageUrl(e.archivo_url) ?? '#'}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0f766e] text-white text-xs font-normal rounded-lg hover:bg-[#115e59] transition-colors shrink-0"
-                        >
+                        <a href={storageUrl(e.archivo_url) ?? '#'} target="_blank" rel="noreferrer"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0f766e] text-white text-xs font-normal rounded-lg hover:bg-[#115e59] transition-colors shrink-0">
                           <Download className="w-3.5 h-3.5" />
                           {e.archivo_nombre ?? 'Archivo'}
                         </a>
@@ -150,13 +143,9 @@ const EvalPanel: React.FC<EvalPanelProps> = ({ project, onClose, onSubmitted }) 
               <label className="text-sm font-medium text-[#0f766e] uppercase tracking-wide block mb-2">
                 Observaciones y Retroalimentación
               </label>
-              <textarea
-                value={notas}
-                onChange={e => setNotas(e.target.value)}
-                rows={4}
+              <textarea value={notas} onChange={e => setNotas(e.target.value)} rows={4}
                 placeholder="Escribe tu análisis del proyecto, fortalezas, áreas de mejora y recomendaciones..."
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm font-medium resize-none focus:ring-2 focus:ring-teal-50 focus:border-[#0f766e] transition-all"
-              />
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm font-medium resize-none focus:ring-2 focus:ring-teal-50 focus:border-[#0f766e] transition-all" />
             </div>
 
             {!esUltimaEtapa && (
@@ -171,24 +160,13 @@ const EvalPanel: React.FC<EvalPanelProps> = ({ project, onClose, onSubmitted }) 
               </label>
             )}
 
-            {error && (
-              <p className="text-sm font-normal text-red-600 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4" /> {error}
-              </p>
-            )}
-            {exito && (
-              <p className="text-sm font-normal text-[#0f766e] flex items-center gap-2">
-                <CheckCircle className="w-4 h-4" /> Evaluación enviada exitosamente.
-              </p>
-            )}
+            {error && <p className="text-sm font-normal text-red-600 flex items-center gap-2"><AlertCircle className="w-4 h-4" /> {error}</p>}
+            {exito && <p className="text-sm font-normal text-[#0f766e] flex items-center gap-2"><CheckCircle className="w-4 h-4" /> Evaluación enviada exitosamente.</p>}
 
             <div className="flex gap-3 pt-2">
-              <button type="button" onClick={onClose} className="flex-1 px-5 py-2.5 border border-gray-200 text-gray-600 font-normal rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                Cancelar
-              </button>
+              <button type="button" onClick={onClose} className="flex-1 px-5 py-2.5 border border-gray-200 text-gray-600 font-normal rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">Cancelar</button>
               <button type="submit" disabled={loading || exito} className="flex-1 px-5 py-2.5 bg-[#0f766e] text-white font-normal rounded-lg hover:bg-[#115e59] transition-colors cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2">
-                <Send className="w-4 h-4" />
-                {loading ? 'Enviando...' : 'Enviar Evaluación'}
+                <Send className="w-4 h-4" /> {loading ? 'Enviando...' : 'Enviar Evaluación'}
               </button>
             </div>
           </form>
@@ -198,42 +176,50 @@ const EvalPanel: React.FC<EvalPanelProps> = ({ project, onClose, onSubmitted }) 
   );
 };
 
-// ── Layout Principal ──────────────────────────────────────────────────────────
 export const MentorDashboard: React.FC<MentorDashboardProps> = ({ user, onLogout }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const navigate  = useNavigate();
-  const location  = useLocation();
-  const isActive  = (path: string) => location.pathname === path;
+  const [page, setPage] = useState('dashboard');
+  const [seguimientoId, setSeguimientoId] = useState<number | null>(null);
   const [, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const cargarProyectos = () => {
-    getDashboard().then(({ projects }) => setProjects(projects)).catch(console.error);
+    getDashboard().then(({ projects }) => setProjects(Array.isArray(projects) ? projects : [])).catch(console.error);
   };
 
   useEffect(() => { cargarProyectos(); }, []);
 
-
   const navItems = [
-    { path: '/mentor/dashboard',    label: 'Resumen General',   icon: LayoutDashboard },
-    { path: '/mentor/evaluaciones', label: 'Revisar Proyectos', icon: ClipboardCheck },
-    { path: '/mentor/seguimiento',  label: 'Seguimiento',       icon: Activity },
-    { path: '/mentor/asesorias',    label: 'Mis Asesorías',     icon: CalendarDays },
-    { path: '/mentor/perfil',       label: 'Mi Perfil',         icon: UserCircle },
+    { id: 'dashboard',    label: 'Resumen General',   icon: LayoutDashboard },
+    { id: 'evaluaciones', label: 'Revisar Proyectos', icon: ClipboardCheck },
+    { id: 'seguimiento',  label: 'Seguimiento',       icon: Activity },
+    { id: 'asesorias',    label: 'Mis Asesorías',     icon: CalendarDays },
+    { id: 'perfil',       label: 'Mi Perfil',         icon: UserCircle },
   ];
+
+  const goToSeguimiento = (id: number) => {
+    setSeguimientoId(id);
+    setPage('seguimiento-detalle');
+  };
+
+  const renderPage = () => {
+    switch (page) {
+      case 'evaluaciones':        return <EvaluacionesPage />;
+      case 'seguimiento':         return <SeguimientoPage />;
+      case 'seguimiento-detalle': return <SeguimientoDetallePage id={seguimientoId ?? 0} />;
+      case 'asesorias':           return <AsesoriasPage />;
+      case 'perfil':              return <PerfilPage />;
+      default:                    return <DocenteDashboardPage onNavigateToEvaluaciones={() => setPage('evaluaciones')} onNavigateToAsesorias={() => setPage('asesorias')} />;
+    }
+  };
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] font-sans selection:bg-[#0f766e] selection:text-white overflow-hidden">
 
       {selectedProject && (
-        <EvalPanel
-          project={selectedProject}
-          onClose={() => setSelectedProject(null)}
-          onSubmitted={cargarProyectos}
-        />
+        <EvalPanel project={selectedProject} onClose={() => setSelectedProject(null)} onSubmitted={cargarProyectos} />
       )}
 
-      {/* Sidebar */}
       <aside className="w-64 bg-[#0f766e] text-white flex flex-col relative z-20 shrink-0">
         <div className="h-16 flex items-center gap-3 px-5 border-b border-white/10 bg-[#115e59]">
           <LayoutDashboard className="w-5 h-5 text-white opacity-80" />
@@ -241,13 +227,10 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({ user, onLogout
         </div>
 
         <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
-          {navItems.map(({ path, label, icon: Icon }) => (
-            <button
-              key={path}
-              onClick={() => navigate(path)}
+          {navItems.map(({ id, label, icon: Icon }) => (
+            <button key={id} onClick={() => setPage(id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-normal transition-colors cursor-pointer text-sm
-                ${isActive(path) ? 'bg-white text-[#0f766e]' : 'text-teal-100 hover:bg-white/10 hover:text-white'}`}
-            >
+                ${page === id ? 'bg-white text-[#0f766e]' : 'text-teal-100 hover:bg-white/10 hover:text-white'}`}>
               <Icon className="w-4 h-4 shrink-0" />
               {label}
             </button>
@@ -261,19 +244,11 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({ user, onLogout
         </div>
       </aside>
 
-      {/* Main */}
       <div className="flex-1 flex flex-col relative overflow-hidden">
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-end gap-2 px-8 z-10 shrink-0">
           <NotificacionesBell accentColor="#0f766e" />
-          <div
-            className="relative"
-            onMouseEnter={() => setIsProfileOpen(true)}
-            onMouseLeave={() => setIsProfileOpen(false)}
-          >
-            <button
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer p-2 rounded-lg hover:bg-gray-50"
-            >
+          <div className="relative" onMouseEnter={() => setIsProfileOpen(true)} onMouseLeave={() => setIsProfileOpen(false)}>
+            <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer p-2 rounded-lg hover:bg-gray-50">
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-medium text-[#0f766e] leading-none">{user.nombre}</p>
                 <p className="text-xs text-gray-500 font-medium mt-1">{user.correo}</p>
@@ -287,33 +262,7 @@ export const MentorDashboard: React.FC<MentorDashboardProps> = ({ user, onLogout
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-10 scroll-smooth">
           <div className="max-w-6xl mx-auto w-full">
-
-            <Routes>
-              <Route index element={
-                <DocenteDashboardPage
-                  onNavigateToEvaluaciones={() => navigate('/mentor/evaluaciones')}
-                  onNavigateToAsesorias={() => navigate('/mentor/asesorias')}
-                />
-              } />
-              <Route path="dashboard" element={
-                <DocenteDashboardPage
-                  onNavigateToEvaluaciones={() => navigate('/mentor/evaluaciones')}
-                  onNavigateToAsesorias={() => navigate('/mentor/asesorias')}
-                />
-              } />
-              <Route path="evaluaciones" element={<EvaluacionesPage />} />
-              <Route path="seguimiento"                    element={<SeguimientoPage />} />
-              <Route path="seguimiento/:id_proyecto"      element={<SeguimientoDetallePage />} />
-              <Route path="asesorias" element={<AsesoriasPage />} />
-              <Route path="perfil" element={<PerfilPage />} />
-              <Route path="*" element={
-                <DocenteDashboardPage
-                  onNavigateToEvaluaciones={() => navigate('/mentor/evaluaciones')}
-                  onNavigateToAsesorias={() => navigate('/mentor/asesorias')}
-                />
-              } />
-            </Routes>
-
+            {renderPage()}
           </div>
         </main>
       </div>

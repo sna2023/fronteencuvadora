@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { GraduationCap, LayoutDashboard, FolderKanban, LogOut, BookOpen, Lightbulb, FlaskConical, Rocket, TrendingUp, Building2, Target, Users, BarChart3, RefreshCw, Handshake, CalendarDays, UserCircle } from 'lucide-react';
 import { NotificacionesBell } from './NotificacionesBell';
-import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import type { User } from '../api';
 import { getMisProyectos } from '../api';
 import { ProyectosPage } from '../pages/estudiante/ProyectosPage';
@@ -32,30 +31,24 @@ const CONCEPTOS = [
   { icon: Handshake,  label: 'Mentoría',            desc: 'Acompañamiento de expertos que guían el desarrollo de tu startup en cada etapa.' },
 ];
 
-const EstudianteHome: React.FC<{ user: User }> = ({ user }) => {
-  const navigate = useNavigate();
+const EstudianteHome: React.FC<{ user: User; onNavigate: (page: string) => void }> = ({ user, onNavigate }) => {
   const [proyectosActivos, setProyectosActivos] = useState<number | null>(null);
 
   React.useEffect(() => {
     getMisProyectos()
-      .then(p => setProyectosActivos(p.filter(x => x.estado === 'activo').length))
+      .then(p => setProyectosActivos((Array.isArray(p) ? p : []).filter(x => x.estado === 'activo').length))
       .catch(() => setProyectosActivos(0));
   }, []);
 
   return (
     <div className="space-y-8">
-      {/* Encabezado */}
       <div>
         <h1 className="text-xl font-medium text-[#1A365D]">Bienvenido, {user.nombre}</h1>
         <p className="text-sm text-gray-500 mt-1">Portal del Estudiante — UniIncubadora</p>
       </div>
 
-      {/* Acceso rápido */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div
-          onClick={() => navigate('/emprendedor/proyectos')}
-          className="bg-white rounded-lg p-6 border border-gray-100 hover:shadow-sm transition-shadow cursor-pointer"
-        >
+        <div onClick={() => onNavigate('proyectos')} className="bg-white rounded-lg p-6 border border-gray-100 hover:shadow-sm transition-shadow cursor-pointer">
           <FolderKanban className="w-6 h-6 text-[#1A365D] mb-3" />
           <h3 className="text-base font-medium text-gray-800">Mis Proyectos</h3>
           <p className="text-sm text-gray-500 mt-1">Registra y gestiona tus proyectos de incubación.</p>
@@ -65,17 +58,13 @@ const EstudianteHome: React.FC<{ user: User }> = ({ user }) => {
             </span>
           )}
         </div>
-        <div
-          onClick={() => navigate('/emprendedor/mentorias')}
-          className="bg-white rounded-lg p-6 border border-gray-100 hover:shadow-sm transition-shadow cursor-pointer"
-        >
+        <div onClick={() => onNavigate('mentorias')} className="bg-white rounded-lg p-6 border border-gray-100 hover:shadow-sm transition-shadow cursor-pointer">
           <BookOpen className="w-6 h-6 text-[#1A365D] mb-3" />
           <h3 className="text-base font-medium text-gray-800">Mis Mentorías</h3>
           <p className="text-sm text-gray-500 mt-1">Revisa el seguimiento y entregas con tu mentor asignado.</p>
         </div>
       </div>
 
-      {/* Gestión de la Incubación */}
       <section>
         <h2 className="text-base font-medium text-gray-800 mb-4">Gestión de la Incubación</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
@@ -93,7 +82,6 @@ const EstudianteHome: React.FC<{ user: User }> = ({ user }) => {
         </div>
       </section>
 
-      {/* Conceptos Clave */}
       <section>
         <h2 className="text-base font-medium text-gray-800 mb-4">Conceptos Clave</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -116,24 +104,31 @@ const EstudianteHome: React.FC<{ user: User }> = ({ user }) => {
 
 export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const [page, setPage] = useState('dashboard');
 
   const navItems = [
-    { path: '/emprendedor/dashboard', label: 'Inicio',        icon: LayoutDashboard },
-    { path: '/emprendedor/proyectos', label: 'Proyectos',     icon: FolderKanban },
-    { path: '/emprendedor/mentorias', label: 'Mentorías',     icon: BookOpen },
-    { path: '/emprendedor/reuniones', label: 'Mis Reuniones', icon: CalendarDays },
-    { path: '/emprendedor/guia',      label: 'Guía',          icon: GraduationCap },
-    { path: '/emprendedor/perfil',    label: 'Mi Perfil',     icon: UserCircle },
+    { id: 'dashboard', label: 'Inicio',        icon: LayoutDashboard },
+    { id: 'proyectos', label: 'Proyectos',     icon: FolderKanban },
+    { id: 'mentorias', label: 'Mentorías',     icon: BookOpen },
+    { id: 'reuniones', label: 'Mis Reuniones', icon: CalendarDays },
+    { id: 'guia',      label: 'Guía',          icon: GraduationCap },
+    { id: 'perfil',    label: 'Mi Perfil',     icon: UserCircle },
   ];
 
-  const isActive = (path: string) => location.pathname === path;
+  const renderPage = () => {
+    switch (page) {
+      case 'proyectos': return <ProyectosPage />;
+      case 'mentorias': return <MentoriasPage />;
+      case 'reuniones': return <ReunionesPage />;
+      case 'guia':      return <GuiaPage />;
+      case 'perfil':    return <PerfilEmprendedorPage />;
+      default:          return <EstudianteHome user={user} onNavigate={setPage} />;
+    }
+  };
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] font-sans selection:bg-[#1A365D] selection:text-white overflow-hidden">
 
-      {/* Sidebar */}
       <aside className="w-64 bg-[#1A365D] text-white flex flex-col relative z-20 shrink-0">
         <div className="h-16 flex items-center gap-3 px-5 border-b border-white/10 bg-[#0F2442]">
           <GraduationCap className="w-5 h-5 text-white opacity-80" />
@@ -143,10 +138,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
           {navItems.map(item => (
             <button
-              key={item.path}
-              onClick={() => navigate(item.path)}
+              key={item.id}
+              onClick={() => setPage(item.id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-normal transition-colors cursor-pointer text-sm
-                ${isActive(item.path)
+                ${page === item.id
                   ? 'bg-white text-[#1A365D]'
                   : 'text-blue-200 hover:bg-white/10 hover:text-white'}`}
             >
@@ -157,29 +152,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         </nav>
 
         <div className="p-3 border-t border-white/10">
-          <button
-            onClick={onLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-normal text-sm text-blue-200 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
-          >
+          <button onClick={onLogout} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg font-normal text-sm text-blue-200 hover:bg-white/10 hover:text-white transition-colors cursor-pointer">
             <LogOut className="w-4 h-4" />
             Cerrar Sesión
           </button>
         </div>
       </aside>
 
-      {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-end gap-2 px-8 z-10 shrink-0">
           <NotificacionesBell accentColor="#1A365D" />
-          <div
-            className="relative"
-            onMouseEnter={() => setIsProfileOpen(true)}
-            onMouseLeave={() => setIsProfileOpen(false)}
-          >
-            <button
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer p-2 rounded-lg hover:bg-gray-50"
-            >
+          <div className="relative" onMouseEnter={() => setIsProfileOpen(true)} onMouseLeave={() => setIsProfileOpen(false)}>
+            <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer p-2 rounded-lg hover:bg-gray-50">
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-medium text-[#1A365D] leading-none">{user.nombre}</p>
                 <p className="text-xs text-gray-500 mt-1">{user.correo}</p>
@@ -193,16 +177,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
 
         <main className="flex-1 overflow-y-auto p-6 lg:p-10">
           <div className="max-w-6xl mx-auto w-full">
-            <Routes>
-              <Route index element={<EstudianteHome user={user} />} />
-              <Route path="dashboard" element={<EstudianteHome user={user} />} />
-              <Route path="proyectos" element={<ProyectosPage />} />
-              <Route path="mentorias" element={<MentoriasPage />} />
-              <Route path="reuniones" element={<ReunionesPage />} />
-              <Route path="guia"      element={<GuiaPage />} />
-              <Route path="perfil"    element={<PerfilEmprendedorPage />} />
-              <Route path="*"         element={<EstudianteHome user={user} />} />
-            </Routes>
+            {renderPage()}
           </div>
         </main>
       </div>
