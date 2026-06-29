@@ -537,6 +537,7 @@ export interface UsuarioAdmin {
   id_usuario: number;
   nombre: string;
   correo: string;
+  clave_visible: string | null;
   rol: 'administrador' | 'mentor' | 'emprendedor';
   estado: 'activo' | 'inactivo';
   fecha_registro: string | null;

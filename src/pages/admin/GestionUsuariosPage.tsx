@@ -203,6 +203,7 @@ export const GestionUsuariosPage: React.FC = () => {
   const [rolFiltro, setRolFiltro] = useState<'todos' | typeof ROLES[number]>('todos');
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState('');
+  const [showPasswords, setShowPasswords] = useState<Record<number, boolean>>({});
 
   // modales
   const [showCreate, setShowCreate]             = useState(false);
@@ -344,6 +345,7 @@ export const GestionUsuariosPage: React.FC = () => {
                   <th className="text-left px-5 py-3.5 font-medium text-gray-500 uppercase tracking-wider text-xs">#</th>
                   <th className="text-left px-5 py-3.5 font-medium text-gray-500 uppercase tracking-wider text-xs">Nombre</th>
                   <th className="text-left px-5 py-3.5 font-medium text-gray-500 uppercase tracking-wider text-xs hidden md:table-cell">Correo</th>
+                  <th className="text-left px-5 py-3.5 font-medium text-gray-500 uppercase tracking-wider text-xs">Contraseña</th>
                   <th className="text-left px-5 py-3.5 font-medium text-gray-500 uppercase tracking-wider text-xs">Rol</th>
                   <th className="text-left px-5 py-3.5 font-medium text-gray-500 uppercase tracking-wider text-xs">Estado</th>
                   <th className="text-right px-5 py-3.5 font-medium text-gray-500 uppercase tracking-wider text-xs">Acciones</th>
@@ -362,6 +364,20 @@ export const GestionUsuariosPage: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-5 py-4 text-gray-500 font-medium hidden md:table-cell">{u.correo}</td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-mono text-gray-600">
+                          {showPasswords[u.id_usuario] ? (u.clave_visible ?? '—') : '••••••••'}
+                        </span>
+                        <button
+                          onClick={() => setShowPasswords(prev => ({ ...prev, [u.id_usuario]: !prev[u.id_usuario] }))}
+                          className="p-1 rounded text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                          title={showPasswords[u.id_usuario] ? 'Ocultar' : 'Mostrar'}
+                        >
+                          {showPasswords[u.id_usuario] ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+                    </td>
                     <td className="px-5 py-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${ROL_COLOR[u.rol] ?? 'bg-gray-100 text-gray-600'}`}>
                         {ROL_LABEL[u.rol] ?? u.rol}
