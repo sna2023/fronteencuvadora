@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   GraduationCap, Mail, Lock, LogIn, ArrowRight,
   User, Eye, EyeOff, CheckCircle2, AlertCircle,
 } from 'lucide-react';
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
 import { login as apiLogin, register as apiRegister, firebaseLogin as apiFirebaseLogin, type User as UserType } from '../api';
 
@@ -28,6 +28,27 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error,     setError]     = useState('');
   const [success,   setSuccess]   = useState('');
+
+  useEffect(() => {
+    const handleRedirect = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          setIsLoading(true);
+          const idToken = await result.user.getIdToken();
+          const { user, token } = await apiFirebaseLogin(idToken);
+          onLogin(user, token);
+        }
+      } catch (err) {
+        if ((err as any)?.code !== 'auth/popup-closed-by-user') {
+          setError(err instanceof Error ? err.message : 'Error al autenticar con Google.');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    handleRedirect();
+  }, [onLogin]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,15 +248,9 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       setError('');
                       setIsLoading(true);
                       try {
-                        const result = await signInWithPopup(auth, googleProvider);
-                        const idToken = await result.user.getIdToken();
-                        const { user, token } = await apiFirebaseLogin(idToken);
-                        onLogin(user, token);
+                        await signInWithRedirect(auth, googleProvider);
                       } catch (err) {
-                        if ((err as any)?.code !== 'auth/popup-closed-by-user') {
-                          setError(err instanceof Error ? err.message : 'Error al autenticar con Google.');
-                        }
-                      } finally {
+                        setError(err instanceof Error ? err.message : 'Error al autenticar con Google.');
                         setIsLoading(false);
                       }
                     }}
@@ -249,7 +264,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                       <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                     </svg>
-                    Continuar con Google
+                    {isLoading ? 'Redirigiendo a Google...' : 'Continuar con Google'}
                   </button>
                 </div>
 
