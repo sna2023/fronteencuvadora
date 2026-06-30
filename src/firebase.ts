@@ -2,13 +2,13 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyANv06GKxOhqSAF5V8Ii1_CvtQ4PEnSKEo",
-  authDomain: "incuvadoraunesum.firebaseapp.com",
-  projectId: "incuvadoraunesum",
-  storageBucket: "incuvadoraunesum.firebasestorage.app",
-  messagingSenderId: "1030800499466",
-  appId: "1:1030800499466:web:e2b86435639358bd4650f3",
-  measurementId: "G-7R7NPN53D4"
+  apiKey: "AIzaSyAP5SjIlcpzf-UQSBX7OFE_FYtBh8Cgm_8",
+  authDomain: "incuvadoraauthen.firebaseapp.com",
+  projectId: "incuvadoraauthen",
+  storageBucket: "incuvadoraauthen.firebasestorage.app",
+  messagingSenderId: "814517190665",
+  appId: "1:814517190665:web:843e8ee915c1c5c41b38d8",
+  measurementId: "G-CYT9QVFZK4"
 };
 
 const app = initializeApp(firebaseConfig);
