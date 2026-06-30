@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   GraduationCap, Mail, Lock, LogIn, ArrowRight,
   User, Eye, EyeOff, CheckCircle2, AlertCircle,
 } from 'lucide-react';
-import { signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { signInWithRedirect } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
-import { login as apiLogin, register as apiRegister, firebaseLogin as apiFirebaseLogin, type User as UserType } from '../api';
+import { login as apiLogin, register as apiRegister, type User as UserType } from '../api';
 
 interface LoginProps {
   onLogin: (user: UserType, token: string) => void;
@@ -28,27 +28,6 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error,     setError]     = useState('');
   const [success,   setSuccess]   = useState('');
-
-  useEffect(() => {
-    const handleRedirect = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          setIsLoading(true);
-          const idToken = await result.user.getIdToken();
-          const { user, token } = await apiFirebaseLogin(idToken);
-          onLogin(user, token);
-        }
-      } catch (err) {
-        if ((err as any)?.code !== 'auth/popup-closed-by-user') {
-          setError(err instanceof Error ? err.message : 'Error al autenticar con Google.');
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    handleRedirect();
-  }, [onLogin]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
