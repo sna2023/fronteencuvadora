@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   GraduationCap, Mail, Lock, LogIn, ArrowRight,
   User, Eye, EyeOff, CheckCircle2, AlertCircle,
 } from 'lucide-react';
-import { getRedirectResult, signInWithRedirect } from 'firebase/auth';
-import { auth, googleProvider } from '../firebase';
-import { login as apiLogin, register as apiRegister, firebaseLogin as apiFirebaseLogin, type User as UserType } from '../api';
+import { login as apiLogin, register as apiRegister, type User as UserType } from '../api';
 
 interface LoginProps {
   onLogin: (user: UserType, token: string) => void;
@@ -28,23 +26,6 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error,     setError]     = useState('');
   const [success,   setSuccess]   = useState('');
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user && !cancelled) {
-          const idToken = await result.user.getIdToken();
-          const { user: loggedUser, token } = await apiFirebaseLogin(idToken);
-          onLogin(loggedUser, token);
-        }
-      } catch {
-        // silencioso - el redirect puede fallar si el usuario cierra la ventana
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +54,19 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al registrarse.');
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setIsLoading(true);
+    try {
+      const { signInWithRedirect, GoogleAuthProvider } = await import('firebase/auth');
+      const { auth, googleProvider } = await import('../firebase');
+      await signInWithRedirect(auth, googleProvider);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error con Google.');
       setIsLoading(false);
     }
   };
@@ -162,7 +156,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               </h1>
               <p className="text-sm text-gray-400 mt-1">
                 {mode === 'login'
-                  ? 'Ingresa para continuar en la plataforma.'
+                  ? 'Ingresa con tu correo institucional UNESUM.'
                   : 'Regístrate con tu correo institucional.'}
               </p>
 
@@ -207,7 +201,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       <div className="relative">
                         <Mail className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
                         <input type="email" value={loginCorreo} onChange={e => setLoginCorreo(e.target.value)}
-                          required className={inp} placeholder="usuario@universidad.edu.ec" />
+                          required className={inp} placeholder="usuario@unesum.edu.ec" />
                       </div>
                     </div>
                     <div>
@@ -232,24 +226,15 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   </form>
 
                   {/* Divider */}
-                  <div className="flex items-center gap-3 my-4">
+                  <div className="flex items-center gap-3 my-2">
                     <div className="flex-1 h-px bg-gray-200" />
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">o</span>
                     <div className="flex-1 h-px bg-gray-200" />
                   </div>
 
-                  {/* Google Login via Firebase */}
+                  {/* Google Login */}
                   <button
-                    onClick={async () => {
-                      setError('');
-                      setIsLoading(true);
-                      try {
-                        await signInWithRedirect(auth, googleProvider);
-                      } catch (err) {
-                        setError(err instanceof Error ? err.message : 'Error al autenticar con Google.');
-                        setIsLoading(false);
-                      }
-                    }}
+                    onClick={handleGoogleLogin}
                     type="button"
                     disabled={isLoading}
                     className="w-full py-3 rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-sm font-bold transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-70 shadow-sm"
@@ -260,7 +245,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                       <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                       <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                     </svg>
-                    {isLoading ? 'Redirigiendo a Google...' : 'Continuar con Google'}
+                    Continuar con Google
                   </button>
                 </div>
 
@@ -277,11 +262,11 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         </div>
                       </div>
                       <div className="col-span-2">
-                        <label className={lbl}>Correo institucional</label>
+                        <label className={lbl}>Correo institucional UNESUM</label>
                         <div className="relative">
                           <Mail className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
                           <input type="email" value={correo} onChange={e => setCorreo(e.target.value)}
-                            required className={inp} placeholder="usuario@universidad.edu.ec" />
+                            required className={inp} placeholder="usuario@unesum.edu.ec" />
                         </div>
                       </div>
                       <div className="col-span-2">
