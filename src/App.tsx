@@ -1,20 +1,9 @@
 import { useState, useEffect, Component, type ReactNode } from 'react';
-import { getRedirectResult } from 'firebase/auth';
-import { auth } from './firebase';
 import { Login } from './components/Login';
 import { AdminDashboard } from './components/AdminDashboard';
 import { MentorDashboard } from './components/MentorDashboard';
 import { Dashboard } from './components/Dashboard';
-import { logout as apiLogout, firebaseLogin as apiFirebaseLogin, type User } from './api';
-
-const originalRemoveChild = Node.prototype.removeChild;
-Node.prototype.removeChild = function (child: Node) {
-  try {
-    return originalRemoveChild.call(this, child);
-  } catch {
-    return child;
-  }
-};
+import { logout as apiLogout, type User } from './api';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: string }> {
   state = { hasError: false, error: '' };
@@ -41,37 +30,15 @@ function App() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const init = async () => {
-      const savedUser = localStorage.getItem('user');
-      if (savedUser) {
-        try { setUser(JSON.parse(savedUser)); } catch {
-          localStorage.removeItem('user');
-          localStorage.removeItem('token');
-        }
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try { setUser(JSON.parse(savedUser)); } catch {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
       }
-      setReady(true);
-    };
-    init();
+    }
+    setReady(true);
   }, []);
-
-  useEffect(() => {
-    if (!ready) return;
-    const handleRedirect = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          const idToken = await result.user.getIdToken();
-          const { user: loggedUser, token } = await apiFirebaseLogin(idToken);
-          localStorage.setItem('token', token);
-          localStorage.setItem('user', JSON.stringify(loggedUser));
-          setUser(loggedUser);
-        }
-      } catch {
-        // silencioso
-      }
-    };
-    handleRedirect();
-  }, [ready]);
 
   const handleLogin = (loggedUser: User, token: string) => {
     localStorage.setItem('token', token);
