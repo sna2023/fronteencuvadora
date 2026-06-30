@@ -62,7 +62,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     setError('');
     setIsLoading(true);
     try {
-      const { signInWithRedirect, GoogleAuthProvider } = await import('firebase/auth');
+      const { signInWithRedirect } = await import('firebase/auth');
       const { auth, googleProvider } = await import('../firebase');
       await signInWithRedirect(auth, googleProvider);
     } catch (err) {
