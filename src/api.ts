@@ -77,6 +77,20 @@ export async function logout() {
   return request('/logout', { method: 'POST' });
 }
 
+export async function googleLogin(token: string) {
+  return request<{ user: User; token: string }>('/auth/google/login', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  });
+}
+
+export async function firebaseLogin(idToken: string) {
+  return request<{ user: User; token: string }>('/auth/firebase/login', {
+    method: 'POST',
+    body: JSON.stringify({ idToken }),
+  });
+}
+
 
 // Dashboard (filtra por rol en el backend)
 export async function getDashboard() {
