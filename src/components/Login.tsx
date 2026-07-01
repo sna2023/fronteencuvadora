@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   GraduationCap, Mail, Lock, LogIn, ArrowRight,
   User, Eye, EyeOff, CheckCircle2, AlertCircle,
 } from 'lucide-react';
-import { login as apiLogin, register as apiRegister, type User as UserType } from '../api';
+import { login as apiLogin, register as apiRegister, firebaseLogin as apiFirebaseLogin, type User as UserType } from '../api';
 
 interface LoginProps {
   onLogin: (user: UserType, token: string) => void;
@@ -26,6 +26,25 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error,     setError]     = useState('');
   const [success,   setSuccess]   = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { getRedirectResult } = await import('firebase/auth');
+        const { auth } = await import('../firebase');
+        const result = await getRedirectResult(auth);
+        if (result?.user && !cancelled) {
+          const idToken = await result.user.getIdToken();
+          const { user: loggedUser, token } = await apiFirebaseLogin(idToken);
+          onLogin(loggedUser, token);
+        }
+      } catch {
+        // silencioso
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
