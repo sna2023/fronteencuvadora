@@ -1,9 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Component, type ReactNode } from 'react';
 import { Login } from './components/Login';
 import { AdminDashboard } from './components/AdminDashboard';
 import { MentorDashboard } from './components/MentorDashboard';
 import { Dashboard } from './components/Dashboard';
 import { logout as apiLogout, type User } from './api';
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch() {}
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="h-screen w-screen flex flex-col items-center justify-center bg-gray-50 gap-4 p-8 text-center">
+          <p className="text-lg font-medium text-gray-700">Algo salio mal</p>
+          <button onClick={() => { localStorage.clear(); window.location.reload(); }}
+            className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm cursor-pointer">
+            Recargar
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -44,11 +64,16 @@ function App() {
     return <Login onLogin={handleLogin} />;
   }
 
-  return user.rol === 'administrador'
-    ? <AdminDashboard user={user} onLogout={handleLogout} />
-    : user.rol === 'mentor'
-    ? <MentorDashboard user={user} onLogout={handleLogout} />
-    : <Dashboard user={user} onLogout={handleLogout} />;
+  return (
+    <ErrorBoundary key={user.rol + user.id}>
+      {user.rol === 'administrador'
+        ? <AdminDashboard user={user} onLogout={handleLogout} />
+        : user.rol === 'mentor'
+        ? <MentorDashboard user={user} onLogout={handleLogout} />
+        : <Dashboard user={user} onLogout={handleLogout} />
+      }
+    </ErrorBoundary>
+  );
 }
 
 export default App;
