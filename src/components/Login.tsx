@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   GraduationCap, Mail, Lock, LogIn, ArrowRight,
   User, Eye, EyeOff, CheckCircle2, AlertCircle,
 } from 'lucide-react';
-import { login as apiLogin, register as apiRegister, firebaseLogin as apiFirebaseLogin, type User as UserType } from '../api';
+import { login as apiLogin, register as apiRegister, type User as UserType } from '../api';
 
 interface LoginProps {
   onLogin: (user: UserType, token: string) => void;
@@ -26,25 +26,6 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error,     setError]     = useState('');
   const [success,   setSuccess]   = useState('');
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const { getRedirectResult } = await import('firebase/auth');
-        const { auth } = await import('../firebase');
-        const result = await getRedirectResult(auth);
-        if (result?.user && !cancelled) {
-          const idToken = await result.user.getIdToken();
-          const { user: loggedUser, token } = await apiFirebaseLogin(idToken);
-          onLogin(loggedUser, token);
-        }
-      } catch {
-        // silencioso
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,19 +58,6 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setError('');
-    setIsLoading(true);
-    try {
-      const { signInWithRedirect } = await import('firebase/auth');
-      const { auth, googleProvider } = await import('../firebase');
-      await signInWithRedirect(auth, googleProvider);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error con Google.');
-      setIsLoading(false);
-    }
-  };
-
   const switchMode = (m: 'login' | 'register') => { setMode(m); setError(''); setSuccess(''); };
 
   const inp = 'w-full pl-10 pr-3 py-2.5 border-b border-gray-200 bg-transparent text-sm text-gray-800 outline-none focus:border-teal-500 transition-colors placeholder:text-gray-300';
@@ -101,37 +69,25 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
         background: 'radial-gradient(ellipse at 20% 50%, #ccfbf1 0%, #f0fdf9 40%, #d1fae5 100%)',
       }}
     >
-      {/* Decoración de fondo — círculos */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-teal-100/60 blur-3xl" />
         <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-emerald-100/60 blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-teal-50/80 blur-2xl" />
       </div>
 
-      {/* Card principal */}
       <div className="relative z-10 w-full max-w-4xl mx-4 flex rounded-3xl overflow-hidden shadow-2xl shadow-indigo-200/50">
-
-        {/* ── Franja izquierda ── */}
         <div className="w-2 shrink-0 bg-gradient-to-b from-teal-400 via-emerald-500 to-green-600" />
 
-        {/* ── Contenido ── */}
         <div className="flex-1 flex bg-white">
-
-          {/* Columna izquierda — branding */}
           <div className="hidden md:flex md:w-5/12 flex-col justify-between p-10 bg-gradient-to-br from-teal-600 to-emerald-700 text-white relative overflow-hidden">
-
-            {/* Patrón de puntos */}
             <div className="absolute inset-0 opacity-10"
               style={{
                 backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
                 backgroundSize: '24px 24px',
               }}
             />
-
-            {/* Forma decorativa */}
             <div className="absolute -bottom-16 -right-16 w-56 h-56 rounded-full bg-white/10" />
             <div className="absolute -top-10 -right-10 w-36 h-36 rounded-full bg-white/5" />
-
             <div className="relative z-10">
               <div className="w-11 h-11 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center mb-6">
                 <GraduationCap className="w-6 h-6 text-white" />
@@ -144,7 +100,6 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                 Plataforma para gestionar proyectos de emprendimiento universitario.
               </p>
             </div>
-
             <div className="relative z-10 space-y-3">
               {[
                 'Seguimiento por etapas de incubación',
@@ -159,27 +114,20 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
             </div>
           </div>
 
-          {/* Columna derecha — formulario */}
           <div className="flex-1 flex flex-col justify-between p-8 md:p-10">
-
-            {/* Header */}
             <div>
-              {/* Branding móvil */}
               <div className="flex items-center gap-2 mb-6 md:hidden">
                 <GraduationCap className="w-5 h-5 text-teal-600" />
                 <span className="text-sm font-bold text-teal-600 uppercase tracking-widest">UniIncubadora</span>
               </div>
-
               <h1 className="text-2xl font-extrabold text-gray-900">
                 {mode === 'login' ? 'Hola, bienvenido' : 'Crear cuenta'}
               </h1>
               <p className="text-sm text-gray-400 mt-1">
                 {mode === 'login'
-                  ? 'Ingresa con tu correo institucional UNESUM.'
-                  : 'Regístrate con tu correo institucional.'}
+                  ? 'Ingresa para continuar en la plataforma.'
+                  : 'Regístrate para comenzar.'}
               </p>
-
-              {/* Tabs pill */}
               <div className="flex gap-1 mt-5 mb-6 p-1 bg-gray-100 rounded-xl w-fit">
                 {(['login', 'register'] as const).map(m => (
                   <button key={m} onClick={() => switchMode(m)}
@@ -191,8 +139,6 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                   </button>
                 ))}
               </div>
-
-              {/* Alertas */}
               {success && (
                 <div className="flex items-center gap-2 mb-4 px-4 py-2.5 bg-green-50 border border-green-200 rounded-xl text-green-700 text-xs font-medium">
                   <CheckCircle2 className="w-4 h-4 shrink-0" /> {success}
@@ -205,22 +151,19 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
               )}
             </div>
 
-            {/* Slider de formularios */}
             <div className="flex-1 overflow-hidden">
               <div
                 className="flex w-[200%] h-full transition-transform duration-500 ease-in-out"
                 style={{ transform: mode === 'register' ? 'translateX(-50%)' : 'translateX(0)' }}
               >
-
-                {/* LOGIN */}
-                <div className="w-1/2 flex flex-col justify-center space-y-5">
+                <div className="w-1/2 flex flex-col justify-center">
                   <form onSubmit={handleLogin} className="space-y-5">
                     <div>
                       <label className={lbl}>Correo electrónico</label>
                       <div className="relative">
                         <Mail className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
                         <input type="email" value={loginCorreo} onChange={e => setLoginCorreo(e.target.value)}
-                          required className={inp} placeholder="usuario@unesum.edu.ec" />
+                          required className={inp} placeholder="usuario@gmail.com" />
                       </div>
                     </div>
                     <div>
@@ -243,32 +186,8 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         : <><LogIn className="w-4 h-4" /> Ingresar</>}
                     </button>
                   </form>
-
-                  {/* Divider */}
-                  <div className="flex items-center gap-3 my-2">
-                    <div className="flex-1 h-px bg-gray-200" />
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">o</span>
-                    <div className="flex-1 h-px bg-gray-200" />
-                  </div>
-
-                  {/* Google Login */}
-                  <button
-                    onClick={handleGoogleLogin}
-                    type="button"
-                    disabled={isLoading}
-                    className="w-full py-3 rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-sm font-bold transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-70 shadow-sm"
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                    </svg>
-                    Continuar con Google
-                  </button>
                 </div>
 
-                {/* REGISTER */}
                 <div className="w-1/2 flex flex-col justify-center">
                   <form onSubmit={handleRegister} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
@@ -281,11 +200,11 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                         </div>
                       </div>
                       <div className="col-span-2">
-                        <label className={lbl}>Correo institucional UNESUM</label>
+                        <label className={lbl}>Correo electrónico</label>
                         <div className="relative">
                           <Mail className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-300" />
                           <input type="email" value={correo} onChange={e => setCorreo(e.target.value)}
-                            required className={inp} placeholder="usuario@unesum.edu.ec" />
+                            required className={inp} placeholder="usuario@gmail.com" />
                         </div>
                       </div>
                       <div className="col-span-2">
@@ -332,18 +251,15 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
                     </button>
                   </form>
                 </div>
-
               </div>
             </div>
 
-            {/* Footer */}
             <p className="text-xs text-gray-400 text-center pt-4 border-t border-gray-100 mt-4">
               {mode === 'login'
                 ? <>¿No tienes cuenta?{' '}<button onClick={() => switchMode('register')} className="text-teal-600 font-semibold hover:underline cursor-pointer">Regístrate aquí</button></>
                 : <>¿Ya tienes cuenta?{' '}<button onClick={() => switchMode('login')} className="text-teal-600 font-semibold hover:underline cursor-pointer">Inicia sesión</button></>
               }
             </p>
-
           </div>
         </div>
       </div>
